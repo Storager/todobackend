@@ -1,0 +1,53 @@
+version: '2'
+services:
+  test:
+    build:
+      context:  ../../
+      dockerfile: docker/dev/Dockerfile
+    volumes_from:
+      - cache
+    links:
+      - db
+    environment:
+      DJANGO_SETTINGS_MODULE: todobackend.settings.test
+      MYSQL_HOST: db
+      MYSQL_USER: root
+      MYSQL_PASSWORD: password
+      TEST_OUTPUT_DIR: /reports
+  builder:
+    build: 
+      context:  ../../
+      dockerfile: docker/dev/Dockerfile
+    volumes:
+      - ../../target:/wheelhouse
+    volumes_from:
+      - cache
+    entrypoint: "entrypoint.sh"
+    command: ["pip", "wheel", "--no-index", "-f /build", "."]
+  agent:
+    image: storager/ansible2
+    volumes:
+      - ../../ansible/probe.yml:/ansible/site.yml
+    links:
+      - db
+    environment:
+      PROBE_HOST: "db"
+      PROBE_PORT: "3306"
+  cache:
+    build:
+      context: ../../
+      dockerfile: docker/dev/Dockerfile
+    volumes:
+      - todobackend-cache:/cache
+      - /build
+    entrypoint: "true"
+  db:
+    image: storager/mysql:5.7
+    hostname: db
+    expose:
+      - "3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: password  
+volumes:
+  todobackend-cache:
+    external: true
