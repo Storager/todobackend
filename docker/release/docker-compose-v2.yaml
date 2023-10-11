@@ -4,8 +4,8 @@ services:
     build:
       context:  ../../
       dockerfile: docker/release/Dockerfile
-    volumes_from:
-      - webroot
+    volumes:
+      - webroot:/var/www/todobackend
     links:
       - db
     environment:
@@ -21,13 +21,7 @@ services:
       - "--module todobackend.wsgi"
       - "--master"
       - "--die-on-term"
-  webroot:
-    build:
-      context:  ../../
-      dockerfile: docker/release/Dockerfile
-    volumes:
-      - /var/www/todobackend
-    entrypoint: "true"
+
   nginx:
     build:
       context: .
@@ -36,8 +30,8 @@ services:
       - app
     ports:
       - 8000:8000
-    volumes_from:
-      - "webroot"
+    volumes:
+      - webroot:/var/www/todobackend
   test:
     image: storager/todobackend-specs
     links:
@@ -70,3 +64,5 @@ services:
     environment:
       PROBE_HOST: "db"
       PROBE_PORT: "3306"
+volumes:
+  webroot: {}

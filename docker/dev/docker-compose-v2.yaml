@@ -4,8 +4,9 @@ services:
     build:
       context:  ../../
       dockerfile: docker/dev/Dockerfile
-    volumes_from:
-      - cache
+    volumes:
+      - todobackend-cache:/cache
+      - build:/build
     links:
       - db
     environment:
@@ -18,8 +19,8 @@ services:
     build: 
       context:  ../../
       dockerfile: docker/dev/Dockerfile
-    volumes_from:
-      - cache
+    volumes:
+      - build:/build
     entrypoint: "entrypoint.sh"
     command: ["pip", "wheel", "--no-index", "-f /build", "."]
   agent:
@@ -30,14 +31,6 @@ services:
     environment:
       PROBE_HOST: "db"
       PROBE_PORT: "3306"
-  cache:
-    build:
-      context: ../../
-      dockerfile: docker/dev/Dockerfile
-    volumes:
-      - todobackend-cache:/cache
-      - /build
-    entrypoint: "true"
   db:
     image: storager/mysql:5.7
     hostname: db
@@ -48,3 +41,5 @@ services:
 volumes:
   todobackend-cache:
     external: true
+  build:
+    driver: local

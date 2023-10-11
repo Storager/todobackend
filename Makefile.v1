@@ -4,8 +4,8 @@ ORG_NAME ?= storager
 REPO_NAME ?= todobackend
 
 # Docker-compose files
-DEV_COMPOSE_FILE := docker/dev/docker-compose-v2.yaml
-REL_COMPOSE_FILE := docker/release/docker-compose-v2.yaml
+DEV_COMPOSE_FILE := docker/dev/docker-compose.yaml
+REL_COMPOSE_FILE := docker/release/docker-compose.yaml
 
 # Docker Compose Project Name 
 REL_PROJECT := $(PROJECT_NAME)$(BUILD_ID)
@@ -53,11 +53,10 @@ DOCKER_REGISTRY_AUTH ?=
 .PHONY: test build release clean tag login logout publish
 
 test:
-	${INFO} "Creating cache volume..."
-	@ docker volume create todobackend-cache
 	${INFO} "Building images..."
 	@ docker-compose -p $(DEV_PROJECT) -f $(DEV_COMPOSE_FILE) pull
 	@ docker-compose -p $(DEV_PROJECT) -f $(DEV_COMPOSE_FILE) build --no-cache --pull test
+	@ docker-compose -p $(DEV_PROJECT) -f $(DEV_COMPOSE_FILE) build cache
 	${INFO} "Ensuring database is ready..."
 	@ docker-compose -p $(DEV_PROJECT) -f $(DEV_COMPOSE_FILE) run --rm agent
 	${INFO} "Running tests..."
@@ -79,6 +78,7 @@ release:
 	${INFO} "Building images.."
 	@ docker-compose -p $(REL_PROJECT) -f $(REL_COMPOSE_FILE) pull test
 	@ docker-compose -p $(REL_PROJECT) -f $(REL_COMPOSE_FILE) build app
+	@ docker-compose -p $(REL_PROJECT) -f $(REL_COMPOSE_FILE) build webroot
 	@ docker-compose -p $(REL_PROJECT) -f $(REL_COMPOSE_FILE) build --pull nginx
 	${INFO} "Ensuring database is ready..."
 	@ docker-compose -p $(REL_PROJECT) -f $(REL_COMPOSE_FILE) run --rm agent
