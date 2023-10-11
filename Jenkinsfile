@@ -3,7 +3,6 @@ node {
     
     try {
         stage 'Run unit/integration tests'
-        sh "alias docker-compose='docker compose'"
         sh 'make test'
         
         stage 'Run build'
