@@ -12,8 +12,8 @@ node {
         sh 'make release'
         
         stage 'Tag and publish release'
-        sh "make tag 0.1 latest \$(git rev-parse --short HEAD)\$(git tag --points-at HEAD)"
-        sh "make buildtag 0.1 \$(git rev-parse --abbrev-ref HEAD)"
+        sh "make tag latest \$(git rev-parse --short HEAD) \$(git tag --points-at HEAD)"
+        sh "make buildtag master \$(git rev-parse --points-at HEAD)"
         
         withEnv(["DOCKER_USER=${DOCKER_USER}", 
                   "DOCKER_PASSWORD=${DOCKER_PASSWORD}"]) {
